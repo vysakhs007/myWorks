@@ -1,0 +1,164 @@
+#include <iostream>
+#include <string> 
+#include <queue> 
+
+class Room {
+		int room_no;
+		int floor_no;
+		int cost;
+	public:
+		Room(int room_no, int floor_no, char occupancy, bool ac);
+		int getRoomNo();
+		int getFloorNo();
+		int getCost();
+};
+
+class Hotel {
+	public:
+		std::queue<Room> SingleAC;
+		std::queue<Room> SingleNAC;
+		std::queue<Room> DoubleAC;
+		std::queue<Room> DoubleNAC;
+		std::queue<Room> TripleAC; 
+		std::queue<Room> TripleNAC;
+		bool getAvailability(char type, bool ac);
+		Room processQuery(char type, bool ac);
+};
+
+int main() {
+		Hotel h;
+
+		Room a(101, 1, 'S', 1);
+		Room b(102, 1, 'D', 1);
+		Room c(103, 1, 'D', 0);
+		Room d(201, 2, 'S', 1);
+		Room e(202, 2, 'S', 0);
+		Room f(203, 2, 'D', 1);
+		Room g(204, 3, 'T', 1);
+
+		h.SingleAC.push(a);
+		h.SingleAC.push(d);
+		h.SingleNAC.push(e);
+
+		h.DoubleAC.push(b);
+		h.DoubleAC.push(f);
+		h.DoubleNAC.push(c);
+
+		h.TripleAC.push(g);
+
+		char ch = 'y';
+		do {
+				char type;
+				bool ac;
+
+				std::cin >> type >> ac;
+
+				if ((type != 'S' && type != 'D' && type != 'T') || (ac != 1 && ac != 0)) {
+						std::cout << "Incorrect query\n";
+				}
+				else if (h.getAvailability(type, ac)) {
+					Room r = h.processQuery(type, ac);
+					std::cout << "Room number: " << r.getRoomNo() << ", " << (r.getFloorNo() == 1 ? "first" : "second") << "floor, " << (ac ? "air conditioned, " : "non-air conditioned, ");
+					if (type == 'S') std::cout << "single occupancy, ";
+					else if (type == 'D') std::cout << "double occupancy, ";
+					else if (type == 'T') std::cout << "triple occupancy, ";
+					std::cout << "estimated: Rs. " << r.getCost() << " / day";
+					std::cout << std::endl;
+				}
+				else {
+					if (type == 'S') std::cout << "Single occupancy ";
+					else if (type == 'D') std::cout << "Double occupancy ";
+					else if (type == 'T') std::cout << "Triple occupancy ";
+					std::cout << (ac ? "AC " : "non-AC ") << "room not available.";
+					std::cout << std::endl;
+				}
+						
+				std::cout << "Continue?(y/n) : ";
+				std::cin >> ch;
+
+		} while (ch == 'y');
+}
+
+Room::Room(int room_no, int floor_no, char occupancy, bool ac) {
+		this->room_no = room_no;
+		this->floor_no = floor_no;
+		if (occupancy == 'S') this->cost = 2000;
+		else if (occupancy == 'D') this->cost = 3000;
+		else if (occupancy == 'T') this->cost = 4000;
+
+		if (ac) this->cost += 1000;
+}
+
+int Room::getRoomNo() {
+		return this->room_no;
+}
+
+int Room::getFloorNo() {
+		return this->floor_no;
+}
+
+int Room::getCost() {
+		return this->cost;
+}
+
+bool Hotel::getAvailability(char type, bool ac) {
+		if (type == 'S' && ac) {
+				if (SingleAC.empty()) return false;
+				else return true;
+		}
+		else if (type == 'S' && !ac) {
+				if (SingleNAC.empty()) return false;
+				else return true;
+		}
+		else if (type == 'D' && ac) {
+				if (DoubleAC.empty()) return false;
+				else return true;
+		}
+		else if (type == 'D' && !ac) {
+				if (DoubleNAC.empty()) return false;
+				else return true;
+		}
+		else if (type == 'T' && ac) {
+				if (TripleAC.empty()) return false;
+				else return true;
+		}
+		else if (type == 'T' && !ac) {
+				if (TripleNAC.empty()) return false;
+				else return true;
+		}
+		else return false;
+}
+
+Room Hotel::processQuery(char type, bool ac) {
+		if (type == 'S' && ac) {
+				Room r = SingleAC.front();
+				SingleAC.pop();
+				return r;
+		}
+		else if (type == 'S' && !ac) {
+				Room r = SingleNAC.front();
+				SingleNAC.pop();
+				return r;
+		}
+		else if (type == 'D' && ac) {
+				Room r = DoubleAC.front();
+				DoubleAC.pop();
+				return r;
+		}
+		else if (type == 'D' && !ac) {
+				Room r = DoubleNAC.front();
+				DoubleNAC.pop();
+				return r;
+		}
+		else if (type == 'T' && ac) {
+				Room r = TripleAC.front();
+				TripleAC.pop();
+				return r;
+		}
+		else if (type == 'T' && !ac) {
+				Room r = TripleNAC.front();
+				TripleNAC.pop();
+				return r;
+		}
+}
+
